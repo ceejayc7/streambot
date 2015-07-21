@@ -80,7 +80,7 @@ if __name__ == "__main__":
         port = int(args.port)
     except:
         print "Port must be an integer"
-        sys.exit(0) 
+        sys.exit(0)
     botNick = args.nick
     chanName = "#" + args.channel
     bot = ircBot(server, port, botNick, "streams")
