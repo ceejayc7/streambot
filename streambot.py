@@ -4,6 +4,7 @@ import argparse
 from configmanager import configmanager
 import threading
 import datetime
+import sys
 
 currentStreams = {}
 timeToCheckStreams = 30  # seconds
@@ -75,7 +76,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     server = args.server
-    port = 6667
+    try:
+        port = int(args.port)
+    except:
+        print "Port must be an integer"
+        sys.exit(0)
     botNick = args.nick
     chanName = "#" + args.channel
     bot = ircBot(server, port, botNick, "streams")
