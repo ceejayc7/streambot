@@ -18,7 +18,8 @@ def checkOnlineStreams(plugins, configuredStreams):
             try:
                 latestLiveStreams = siteInstance.get_streams(configuredStreams[siteName])
             except:
-                print str(datetime.datetime.now()) + " - Unable to refresh streams for site siteName"
+                # Since we failed to access the rest API, return out and restart the thread
+                print str(datetime.datetime.now()) + " - Unable to refresh streams for site " + siteName
                 threading.Timer(timeToCheckStreams, checkOnlineStreams, [plugins, configuredStreams]).start()
                 return
 
@@ -28,7 +29,7 @@ def checkOnlineStreams(plugins, configuredStreams):
                     if stream not in currentStreams[siteName].keys():
                         stream = unicode(stream).encode('utf8')
                         title = unicode(title).encode('utf8')
-                        bot.say(chanName, "\x034Now live \x031---- \x0312" + "http://www.twitch.tv/" + stream + "\x034 (" + title + ")")
+                        bot.say(chanName, "\x034Now live \x031---- \x037" + "http://www.twitch.tv/" + stream + "\x034 (" + title + ")")
 
                 # Delete the dictionary branch for update
                 del currentStreams[siteName]
@@ -39,27 +40,121 @@ def checkOnlineStreams(plugins, configuredStreams):
     # Reset the check every timeToCheckStreams
     threading.Timer(timeToCheckStreams, checkOnlineStreams, [plugins, configuredStreams]).start()
 
-def listStreams():
-    liveString = '\x034Currently live \x031---- '
+def printLiveStreams():
+    baseLiveString = '\x034Currently live \x031---- '
+    liveString = baseLiveString
     for site in currentStreams:
         for name, title in currentStreams[site].iteritems():
             name = unicode(name).encode('utf8')
             title = unicode(title).encode('utf8')
-            #liveString += title + " " + "www.twitch.tv/" + name + " // "
-            liveString += '\x0312'+ "http://www.twitch.tv/" + name + "\x034 (" + title + ") \x031---- "
-    bot.say(chanName, liveString[:-5])
+            liveString += '\x037'+ "http://www.twitch.tv/" + name + "\x034 (" + title + ") \x031---- "
+            if len(liveString) > 600:
+                bot.say(chanName, liveString[:-5])
+                liveString = ""
+
+    # Quick check if liveString isn't empty - change to not use literal size values
+    if len(liveString) > len(baseLiveString):
+        bot.say(chanName, liveString[:-5])
+    else:
+        liveString += "\x034Nobody :("
+        bot.say(chanName, liveString)
+
+def isSiteValid(site):
+    for siteName, siteInstance in plugins.availablePlugins.iteritems():
+        if site == siteName:
+            return True
+    return False
+
+def addStream(message):
+    messageList = message.split(' ')
+    # Enforce valid syntax (3 total arguments)
+    if len(messageList) == 3:
+        site = messageList[1]
+        streamer = messageList[2]
+
+        # Ensure site is valid before we begin indexing
+        if isSiteValid(site):
+
+            # Check that the site isn't already added in the config
+            if config.isStreamExist(site, streamer):
+                bot.say(chanName, '\x034%s already exists! Use .list <site> to see the list of all streamers configured to a website' % streamer)
+                return
+
+            # Write the stream to the config
+            if config.writeStream(site, streamer):
+                bot.say(chanName, '\x034%s was added!' % streamer)
+            else:
+                bot.say(chanName, '\x034Could not write to config file. Try again')
+        else:
+            bot.say(chanName, '\x034Site %s is not configured. Use .sites to see a list of compatible websites' % site)
+    else:
+        bot.say(chanName, '\x034Syntax for adding streams is .add <site> <streamer>')
+
+def removeStream(message):
+    messageList = message.split(' ')
+    # Enforce valid syntax (3 total arguments)
+    if len(messageList) == 3:
+        site = messageList[1]
+        streamer = messageList[2]
+
+        # Ensure site is valid before we begin indexing
+        if isSiteValid(site):
+
+            # Check that the streamer exists before trying to remove
+            if not config.isStreamExist(site, streamer):
+                bot.say(chanName, '\x034%s doesn\'t exist! Use .list <site> to see the list of all streamers configured to a website' % streamer)
+                return
+
+            # Remove the stream from the config
+            if config.removeStream(site, streamer):
+                bot.say(chanName, '\x034%s was removed.' % streamer)
+            else:
+                bot.say(chanName, '\x034Could not remove the stream. Try again')
+        else:
+            bot.say(chanName, '\x034Site %s is not configured. Use .sites to see a list of compatible websites' % site)
+    else:
+        bot.say(chanName, '\x034Syntax for removing streams is .remove <site> <streamer>')
+
+def listSites():
+    listOfSites = config.listSites()
+    streamSites = ', '.join(listOfSites)
+    bot.say(chanName, '\x034Valid sites: %s' % streamSites)
+
+def listConfiguredStreams(message):
+    messageList = message.split(' ')
+    # Enforce valid syntax (3 total arguments)
+    if len(messageList) == 2:
+        site = messageList[1]
+
+        # Ensure site is valid before we begin indexing
+        if isSiteValid(site):
+            streamsFromSite = config.getConfiguredStreamsFromSite(site)
+            streamsFromSite = ' '.join(streamsFromSite)
+            bot.say(chanName, '\x034Streams for %s : %s' % (site, streamsFromSite))
+        else:
+            bot.say(chanName, '\x034Site %s is not configured. Use .sites to see a list of compatible websites' % site)
+
+    else:
+        bot.say(chanName, '\x034Syntax for list is .list <site>')
+
 
 def privmsg(sender, headers, message):
     # sender - name of sender
     # saysuccess - function
-    # (message[5:firstSpace], message[firstSpace+1:]) - #bitcoin hias
-    # headers[0] = channel where came from
+    # (message[5:firstSpace], message[firstSpace+1:])
+    # headers[0] = source channel
     channel = headers[0]
-    if message.lower() == ".test":
-        bot.say(chanName, "\x034Now live \x031---- \x0312" + "http://www.twitch.tv/" + "test" + "\x034 (" + "test123" + ")")
-    elif message.lower() == ".live":
-        listStreams()
-            
+    if message.lower() == ".live":
+        printLiveStreams()
+    elif message.lower().startswith(".add"):
+        addStream(message)
+    elif message.lower() == ".sites":
+        listSites()
+    elif message.lower().startswith(".list"):
+        listConfiguredStreams(message)
+    elif message.lower().startswith(".remove"):
+        removeStream(message)
+
 def actionmsg(sender, headers, message):
     print "An ACTION message was sent by " + sender + " with the headers " + str(headers) + ". It says: \"" + sender + " " + message + "\""
 
@@ -98,7 +193,6 @@ if __name__ == "__main__":
 
     bot.start()
     checkOnlineStreams(plugins, configuredStreams)
-    #listStreams()
     inputStr = ""
     while inputStr != "stop":
         inputStr = raw_input()

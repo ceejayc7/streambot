@@ -36,3 +36,4 @@ class twitch(plugin):
 
 __plugin__ = twitch
 __name__ = "twitch"
+__website__ = "http://www.twitch.tv/"
