@@ -5,13 +5,7 @@ import json
 class twitch(plugin):
 
     url = "https://api.twitch.tv/kraken/streams?channel="
-
-    @classmethod
-    def can_handle_url(cls, site, url):
-        if site in __name__:
-            return True
-        else:
-            return False
+    website = "http://www.twitch.tv/"
 
     @classmethod
     def get_streams(cls, streams):
@@ -32,8 +26,3 @@ class twitch(plugin):
             liveStreams[stream["channel"]["name"]] = stream["channel"]["status"]
             #print stream["channel"]["name"], stream["channel"]["url"]
         return liveStreams
-
-
-__plugin__ = twitch
-__name__ = "twitch"
-__website__ = "http://www.twitch.tv/"

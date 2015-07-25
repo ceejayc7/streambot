@@ -29,7 +29,7 @@ def checkOnlineStreams(plugins, configuredStreams):
                     if stream not in currentStreams[siteName].keys():
                         stream = unicode(stream).encode('utf8')
                         title = unicode(title).encode('utf8')
-                        bot.say(chanName, "\x034Now live \x031---- \x037" + "http://www.twitch.tv/" + stream + "\x034 (" + title + ")")
+                        bot.say(chanName, "\x034Now live \x031---- \x037" + siteInstance.website + stream + "\x034 (" + title + ")")
 
                 # Delete the dictionary branch for update
                 del currentStreams[siteName]
@@ -47,7 +47,7 @@ def printLiveStreams():
         for name, title in currentStreams[site].iteritems():
             name = unicode(name).encode('utf8')
             title = unicode(title).encode('utf8')
-            liveString += '\x037'+ "http://www.twitch.tv/" + name + "\x034 (" + title + ") \x031---- "
+            liveString += '\x037'+ plugins.getPluginInstance(site).website + name + "\x034 (" + title + ") \x031---- "
             if len(liveString) > 600:
                 bot.say(chanName, liveString[:-5])
                 liveString = ""

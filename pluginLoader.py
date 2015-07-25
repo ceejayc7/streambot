@@ -19,3 +19,8 @@ class pluginLoader:
             pluginClass = getattr(pluginModule, name)
             # Store the instance
             self.availablePlugins[name] = pluginClass
+
+    def getPluginInstance(self, site):
+       if site in  self.availablePlugins:
+           return self.availablePlugins[site]
+
