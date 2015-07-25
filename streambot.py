@@ -25,11 +25,12 @@ def checkOnlineStreams(plugins, configuredStreams):
 
             if siteName in currentStreams.keys():
                 # Figure out if a new stream went live
-                for stream, title in latestLiveStreams.iteritems():
+                for stream, streamTuple in latestLiveStreams.iteritems():
+                    stream = unicode(stream).encode('utf8')
+                    title = unicode(streamTuple[0]).encode('utf8')
+                    viewers = streamTuple[1]
                     if stream not in currentStreams[siteName].keys():
-                        stream = unicode(stream).encode('utf8')
-                        title = unicode(title).encode('utf8')
-                        bot.say(chanName, "\x034Now live \x031---- \x037" + siteInstance.website + stream + "\x034 (" + title + ")")
+                        bot.say(chanName, "\x034Now live \x031---- \x037" + siteInstance.website + stream + "\x034 (" + title + ") \x034[viewers: " + viewers + "]")
 
                 # Delete the dictionary branch for update
                 del currentStreams[siteName]
@@ -44,10 +45,12 @@ def printLiveStreams():
     baseLiveString = '\x034Currently live \x031---- '
     liveString = baseLiveString
     for site in currentStreams:
-        for name, title in currentStreams[site].iteritems():
-            name = unicode(name).encode('utf8')
-            title = unicode(title).encode('utf8')
-            liveString += '\x037'+ plugins.getPluginInstance(site).website + name + "\x034 (" + title + ") \x031---- "
+        #liveString += '\x034%s \x031---- ' % site.title()
+        for stream, streamTuple in currentStreams[site].iteritems():
+            name = unicode(stream).encode('utf8')
+            title = unicode(streamTuple[0]).encode('utf8')
+            viewers = streamTuple[1]
+            liveString += '\x037'+ plugins.getPluginInstance(site).website + name + "\x034 (" + title + ") \x035[viewers: " + viewers + "] \x031---- "
             if len(liveString) > 600:
                 bot.say(chanName, liveString[:-5])
                 liveString = ""
@@ -86,7 +89,7 @@ def addStream(message):
             else:
                 bot.say(chanName, '\x034Could not write to config file. Try again')
         else:
-            bot.say(chanName, '\x034Site %s is not configured. Use .sites to see a list of compatible websites' % site)
+            bot.say(chanName, '\x034Site %s is not configured. Use .sites to see a list of valid websites' % site)
     else:
         bot.say(chanName, '\x034Syntax for adding streams is .add <site> <streamer>')
 
@@ -117,7 +120,7 @@ def removeStream(message):
 
 def listSites():
     listOfSites = config.listSites()
-    streamSites = ', '.join(listOfSites)
+    streamSites = ' '.join(listOfSites)
     bot.say(chanName, '\x034Valid sites: %s' % streamSites)
 
 def listConfiguredStreams(message):

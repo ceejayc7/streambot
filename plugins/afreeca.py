@@ -14,6 +14,7 @@ class afreeca(plugin):
             data = urllib2.urlopen(cls.url+stream).read()
             isLive = int(et.fromstring(data).findall('result')[0].text)
             if isLive:
-                liveStreams[stream] = stream
+                viewerCount = et.fromstring(data).findall('view_cnt')[0].text
+                liveStreams[stream] = (stream, viewerCount)
 
         return liveStreams
