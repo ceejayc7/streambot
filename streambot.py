@@ -28,9 +28,8 @@ def checkOnlineStreams(plugins, configuredStreams):
                 for stream, streamTuple in latestLiveStreams.iteritems():
                     stream = unicode(stream).encode('utf8')
                     title = unicode(streamTuple[0]).encode('utf8')
-                    viewers = streamTuple[1]
                     if stream not in currentStreams[siteName].keys():
-                        bot.say(chanName, "\x034Now live \x031---- \x037" + siteInstance.website + stream + "\x034 (" + title + ") \x034[viewers: " + viewers + "]")
+                        bot.say(chanName, "\x034Now live \x031---- \x037" + siteInstance.website + stream + "\x034 (" + title + ") ")
 
                 # Delete the dictionary branch for update
                 del currentStreams[siteName]
@@ -50,8 +49,8 @@ def printLiveStreams():
             name = unicode(stream).encode('utf8')
             title = unicode(streamTuple[0]).encode('utf8')
             viewers = streamTuple[1]
-            liveString += '\x037'+ plugins.getPluginInstance(site).website + name + "\x034 (" + title + ") \x035[viewers: " + viewers + "] \x031---- "
-            if len(liveString) > 600:
+            liveString += '\x037'+ plugins.getPluginInstance(site).website + name + "\x034 (" + title + ") \x035[viewers: " + str(viewers) + "] \x031---- "
+            if len(liveString) > 400:
                 bot.say(chanName, liveString[:-5])
                 liveString = ""
 
@@ -132,8 +131,26 @@ def listConfiguredStreams(message):
         # Ensure site is valid before we begin indexing
         if isSiteValid(site):
             streamsFromSite = config.getConfiguredStreamsFromSite(site)
-            streamsFromSite = ' '.join(streamsFromSite)
-            bot.say(chanName, '\x034Streams for %s : %s' % (site, streamsFromSite))
+            maxStreamsPerLineIndex = 25
+            numStreams = 0
+            streamString = ""
+
+            # Only print maxStreamsPerLineIndex when listing streams per line
+            for i in range(0, len(streamsFromSite)):
+                streamString += streamsFromSite[i] + " "
+                numStreams += 1
+
+                # Check if we've exceeded the threshold
+                if numStreams == maxStreamsPerLineIndex:
+                    bot.say(chanName, '\x034Streams for %s : %s' % (site, streamString))
+                    # Reset the vars
+                    streamString = ""
+                    numStreams = 0
+
+            # Flush whatever is left of the string
+            if len(streamString) > 0:
+                bot.say(chanName, '\x034Streams for %s : %s' % (site, streamString))
+
         else:
             bot.say(chanName, '\x034Site %s is not configured. Use .sites to see a list of compatible websites' % site)
 
