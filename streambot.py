@@ -43,6 +43,7 @@ def checkOnlineStreams(plugins, configuredStreams):
 def printLiveStreams():
     baseLiveString = '\x034Currently live \x031---- '
     liveString = baseLiveString
+    hasPrintedStream = False
     for site in currentStreams:
         #liveString += '\x034%s \x031---- ' % site.title()
         for stream, streamTuple in currentStreams[site].iteritems():
@@ -52,12 +53,13 @@ def printLiveStreams():
             liveString += '\x037'+ plugins.getPluginInstance(site).website + name + "\x034 (" + title + ") \x035[viewers: " + str(viewers) + "] \x031---- "
             if len(liveString) > 400:
                 bot.say(chanName, liveString[:-5])
-                liveString = ""
+                liveString = ''
+                hasPrintedStream = True
 
-    # Quick check if liveString isn't empty - change to not use literal size values
-    if len(liveString) > len(baseLiveString):
+    # Quick check if liveString isn't empty
+    if len(liveString) > 0:
         bot.say(chanName, liveString[:-5])
-    else:
+    elif not hasPrintedStream:
         liveString += "\x034Nobody :("
         bot.say(chanName, liveString)
 
