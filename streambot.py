@@ -176,6 +176,10 @@ def privmsg(sender, headers, message):
         listConfiguredStreams(message)
     elif message.lower().startswith(".remove"):
         removeStream(message)
+    elif message.lower() == ".rpc":
+        bot.say(chanName, 'https://www.youtube.com/watch?v=T5zjVppVIdU')
+    elif message.lower() == ".fdb":
+        bot.say(chanName, 'https://www.youtube.com/watch?v=94MK2JQIgFs')
 
 def actionmsg(sender, headers, message):
     print "An ACTION message was sent by " + sender + " with the headers " + str(headers) + ". It says: \"" + sender + " " + message + "\""
