@@ -29,7 +29,7 @@ def checkOnlineStreams(plugins, configuredStreams):
                     stream = unicode(stream).encode('utf8')
                     title = unicode(streamTuple[0]).encode('utf8')
                     if stream not in currentStreams[siteName].keys():
-                        bot.say(chanName, "\x034Now live \x031---- \x037" + siteInstance.website + stream + "\x034 (" + title + ") ")
+                        bot.say(chanName, "\x034Now live \x036---- \x037" + siteInstance.website + stream + "\x034 (" + title + ") ")
 
                 # Delete the dictionary branch for update
                 del currentStreams[siteName]
@@ -41,7 +41,7 @@ def checkOnlineStreams(plugins, configuredStreams):
     threading.Timer(timeToCheckStreams, checkOnlineStreams, [plugins, configuredStreams]).start()
 
 def printLiveStreams():
-    baseLiveString = '\x034Currently live \x031---- '
+    baseLiveString = '\x034Currently live \x036---- '
     liveString = baseLiveString
     hasPrintedStream = False
     for site in currentStreams:
@@ -50,7 +50,7 @@ def printLiveStreams():
             name = unicode(stream).encode('utf8')
             title = unicode(streamTuple[0]).encode('utf8')
             viewers = streamTuple[1]
-            liveString += '\x037'+ plugins.getPluginInstance(site).website + name + "\x034 (" + title + ") \x035[viewers: " + str(viewers) + "] \x031---- "
+            liveString += '\x037'+ plugins.getPluginInstance(site).website + name + "\x034 (" + title + ") \x035[viewers: " + str(viewers) + "] \x036---- "
             if len(liveString) > 400:
                 bot.say(chanName, liveString[:-5])
                 liveString = ''
