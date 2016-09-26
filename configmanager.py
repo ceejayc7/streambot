@@ -10,7 +10,7 @@ class configmanager():
 
     def readConfig(self):
         try:
-            data = open(self.filename).read()
+            data = open("/home/ceejay/kpopbot/"+self.filename).read()
             self.__lastConfigRead = json.loads(data)
             return self.__lastConfigRead
         except IOError as error:
@@ -30,7 +30,7 @@ class configmanager():
     def writeStream(self, site, stream):
         with self.__lock:
             self.__lastConfigRead[site].append(stream)
-            with open(self.filename, 'w') as newFile:
+            with open("/home/ceejay/kpopbot/"+self.filename, 'w') as newFile:
                 json.dump(self.__lastConfigRead, newFile, indent=4)
                 return True
         return False
@@ -38,7 +38,7 @@ class configmanager():
     def removeStream(self, site, stream):
         with self.__lock:
             self.__lastConfigRead[site].remove(stream)
-            with open(self.filename, 'w') as newFile:
+            with open("/home/ceejay/kpopbot/"+self.filename, 'w') as newFile:
                 json.dump(self.__lastConfigRead, newFile, indent=4)
                 return True
         return False
