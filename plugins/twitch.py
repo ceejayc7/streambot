@@ -19,7 +19,7 @@ class twitch(plugin):
 
         req = urllib2.Request(baseUrl)
         req.add_header('Accept','application/vnd.twitchtv.v2+json')
-        req.add_header('Client-ID', 'cinqdao110f3osa411jocnxug2tbd7i')
+        req.add_header('Client-ID', 'xxxx')
         res = urllib2.urlopen(req)
         jsonResponse = json.loads(res.read())
         liveStreams = {}
